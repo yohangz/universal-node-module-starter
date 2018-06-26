@@ -15,8 +15,7 @@ import rollupSassLint from 'rollup-plugin-sass-lint';
 import rollupLivereload from 'rollup-plugin-livereload';
 import rollupServe from 'rollup-plugin-serve';
 import rollupImage from 'rollup-plugin-img';
-import rollupHandlebars from 'rollup-plugin-handlebars-plus';
-import rollupRootImport from 'rollup-plugin-root-import';
+import rollupHandlebars from './plugins/rollup-plugin-handlebars';
 
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
@@ -46,7 +45,7 @@ const config = {
   copy: ['README.md', 'LICENSE'],
   umdGlobals: {},
   esmExternals: [
-    'handlebars/runtime.js'
+    'handlebars/runtime'
   ],
   pathReplacePatterns: [
     {
@@ -159,12 +158,7 @@ const lintPlugins = [
 const bundleTemplatePlugins = (watchMode) => [
   rollupReplacePlugin,
   rollupStyleBuildPlugin(watchMode),
-  rollupRootImport({
-    root: config.partialRoots
-  }),
-  rollupHandlebars({
-    partialRoot: config.partialRoots
-  }),
+  rollupHandlebars(),
   rollupImage({
     extensions: /\.(png|jpg|jpeg|gif|svg)$/,
     limit: 10000000,

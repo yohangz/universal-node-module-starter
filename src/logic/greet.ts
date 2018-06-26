@@ -1,5 +1,6 @@
 import { conf } from "../conf/conf1";
 
+import "../templates/_greetingContent.hbs";
 import HomeTemplate from "../templates/greeting.hbs";
 
 export class Greeter {
