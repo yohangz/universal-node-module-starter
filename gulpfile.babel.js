@@ -14,8 +14,9 @@ import rollupSass from 'rollup-plugin-sass';
 import rollupSassLint from 'rollup-plugin-sass-lint';
 import rollupLivereload from 'rollup-plugin-livereload';
 import rollupServe from 'rollup-plugin-serve';
-import rollupHandlebars from './plugins/rollup-plugin-handlebars';
 import rollupImage from 'rollup-plugin-img';
+import rollupHandlebars from 'rollup-plugin-handlebars-plus';
+import rollupRootImport from 'rollup-plugin-root-import';
 
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
@@ -39,11 +40,13 @@ const config = {
   watch: {
     script: `${__dirname}/.tmp`,
     demo: `${__dirname}/demo/watch`,
+    port: 4000,
+    open: true
   },
   copy: ['README.md', 'LICENSE'],
   umdGlobals: {},
   esmExternals: [
-    'handlebars/runtime'
+    'handlebars/runtime.js'
   ],
   pathReplacePatterns: [
     {
@@ -51,8 +54,11 @@ const config = {
       replace: './conf/conf2',
     }
   ],
-  ignore: []
+  ignore: [],
+  partialRoots: [`${__dirname}/src/templates`]
 };
+
+// Build utils
 
 const baseConfig = {
   input: `${config.source}/${config.entry}`,
@@ -108,7 +114,7 @@ const rollupReplacePlugin = rollupReplace({
   patterns: config.pathReplacePatterns
 });
 
-const resolePlugins = [
+const resolvePlugins = [
   rollupIgnore(config.ignore),
   rollupResolve({
     jsnext: true,
@@ -141,24 +147,29 @@ const tsBuildPlugin = (esVersion, generateDefinition) => {
   return rollupTypescript(buildConf);
 };
 
-const tsLintPlugin = rollupTsLint({
-  include: [`${config.source}/**/*.ts`]
-});
+const lintPlugins = [
+  rollupTsLint({
+    include: [`${config.source}/**/*.ts`]
+  }),
+  rollupSassLint({
+    include: 'src/**/*.scss',
+  })
+];
 
-const scssLintPlugin = rollupSassLint({
-  include: 'src/**/*.scss',
-});
-
-const imageLoadPlugin =  rollupImage({
-  extensions: /\.(png|jpg|jpeg|gif|svg)$/,
-  limit: 10000000,
-  exclude: 'node_modules/**'
-});
-
-const bundleDefaultPlugins = [
-  rollupStyleBuildPlugin(false),
-  rollupHandlebars(),
-  imageLoadPlugin
+const bundleTemplatePlugins = (watchMode) => [
+  rollupReplacePlugin,
+  rollupStyleBuildPlugin(watchMode),
+  rollupRootImport({
+    root: config.partialRoots
+  }),
+  rollupHandlebars({
+    partialRoot: config.partialRoots
+  }),
+  rollupImage({
+    extensions: /\.(png|jpg|jpeg|gif|svg)$/,
+    limit: 10000000,
+    exclude: 'node_modules/**'
+  })
 ];
 
 // Clean tasks
@@ -219,12 +230,10 @@ gulp.task('build:bundle', async () => {
     },
     external: Object.keys(config.umdGlobals),
     plugins: [
-      tsLintPlugin,
-      scssLintPlugin,
-      rollupReplacePlugin,
-      ...bundleDefaultPlugins,
+      ...lintPlugins,
+      ...bundleTemplatePlugins(false),
       tsBuildPlugin('es5', true),
-      ...resolePlugins,
+      ...resolvePlugins,
     ]
   });
 
@@ -238,10 +247,9 @@ gulp.task('build:bundle', async () => {
     },
     external: Object.keys(config.umdGlobals),
     plugins: [
-      rollupReplacePlugin,
-      ...bundleDefaultPlugins,
+      ...bundleTemplatePlugins(false),
       tsBuildPlugin('es5', false),
-      ...resolePlugins,
+      ...resolvePlugins,
       uglify()
     ]
   });
@@ -253,8 +261,7 @@ gulp.task('build:bundle', async () => {
       file: path.join(config.out, 'fesm5', `${packageJson.name}.es5.js`),
     },
     plugins: [
-      rollupReplacePlugin,
-      ...bundleDefaultPlugins,
+      ...bundleTemplatePlugins(false),
       tsBuildPlugin('es5', false)
     ],
     external: config.esmExternals
@@ -268,8 +275,7 @@ gulp.task('build:bundle', async () => {
     },
 
     plugins: [
-      rollupReplacePlugin,
-      ...bundleDefaultPlugins,
+      ...bundleTemplatePlugins(false),
       tsBuildPlugin('es2015', false)
     ],
     external: config.esmExternals
@@ -304,16 +310,14 @@ gulp.task('build:watch', async () => {
     },
     external: Object.keys(config.umdGlobals),
     plugins: [
-      tsLintPlugin,
-      scssLintPlugin,
-      rollupReplacePlugin,
-      rollupStyleBuildPlugin(true),
-      rollupHandlebars(),
-      imageLoadPlugin,
+      ...lintPlugins,
+      ...bundleTemplatePlugins(true),
       tsBuildPlugin('es5', false),
-      ...resolePlugins,
+      ...resolvePlugins,
       rollupServe({
-        contentBase: [config.watch.script, config.watch.demo]
+        contentBase: [config.watch.script, config.watch.demo],
+        port: config.watch.port,
+        open: config.watch.open,
       }),
       rollupLivereload({
         watch: [config.watch.script, config.watch.demo]
