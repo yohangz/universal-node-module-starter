@@ -1,7 +1,7 @@
 {
   "name": "typescript-library-starter",
   "version": "1.0.0",
-  "description": "Typescript based starter kit to build node modules compliant with browser and nodejs",
+  "description": "Typescript based starter kit to build library node modules compliant with Browser and NodeJS",
   "scripts": {
     "build": "gulp build",
     "watch": "gulp watch"
