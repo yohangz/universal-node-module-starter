@@ -1,0 +1,11 @@
+$background-colour: #f8f8ff !default;
+$font-colour: #000 !default;
+
+body {
+  background: $background-colour;
+}
+
+.container {
+  color: $font-colour;
+  vertical-align: center;
+}
