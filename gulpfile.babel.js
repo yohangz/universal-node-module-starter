@@ -16,6 +16,7 @@ import rollupLivereload from 'rollup-plugin-livereload';
 import rollupServe from 'rollup-plugin-serve';
 import rollupImage from 'rollup-plugin-img';
 import rollupHandlebars from './plugins/rollup-plugin-handlebars';
+import rollupFilesize from 'rollup-plugin-filesize';
 
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
@@ -227,7 +228,7 @@ gulp.task('build:bundle', async () => {
       ...lintPlugins,
       ...bundleTemplatePlugins(false),
       tsBuildPlugin('es5', true),
-      ...resolvePlugins,
+      ...resolvePlugins
     ]
   });
 
@@ -244,7 +245,8 @@ gulp.task('build:bundle', async () => {
       ...bundleTemplatePlugins(false),
       tsBuildPlugin('es5', false),
       ...resolvePlugins,
-      uglify()
+      uglify(),
+      rollupFilesize()
     ]
   });
 
