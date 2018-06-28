@@ -5,10 +5,13 @@ export default function ignoreImport(options = {}) {
         return;
       }
 
+      const body = 'export default undefined;';
+
       return {
-        code: '',
-        map: { mappings: '' }
+        code: body,
+        map: null
       };
     }
   };
 }
+
