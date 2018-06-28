@@ -173,9 +173,32 @@ const preBundlePlugins = () => {
   ];
 };
 
+const postBundlePlugins = () => {
+  return [
+    rollupProgress(),
+    rollupFilesize({
+      render : function (options, size, gzippedSize){
+        return chalk.yellow(`Bundle size: ${chalk.red(size)}, Gzipped size: ${chalk.red(gzippedSize)}`);
+      }
+    })
+  ];
+};
+
 const ignoreImportPlugin = rollupIgnoreImport({
   extensions: ['.scss']
 });
+
+const bundleBuild = async (config, type) => {
+  try {
+    console.log(chalk.blue(`${type} bundle build start`));
+    const bundle = await rollup(config);
+    await bundle.write(config.output);
+    console.log(chalk.blue(`${type} bundle build end`));
+  } catch (error) {
+    console.log(chalk.red(`${type} bundle build Failure`));
+    console.log(error);
+  }
+};
 
 // Clean tasks
 
@@ -238,10 +261,13 @@ gulp.task('build:bundle', async () => {
       ...lintPlugins,
       rollupStyleBuildPlugin(false),
       ...preBundlePlugins(),
-      tsBuildPlugin('es5', true),
       ...resolvePlugins,
+      tsBuildPlugin('es5', true),
+      ...postBundlePlugins()
     ]
   });
+
+  await bundleBuild(umdConfig, 'UMD');
 
   // MIN UMD bundle.
   const minifiedUmdConfig = merge({}, baseConfig, {
@@ -255,12 +281,14 @@ gulp.task('build:bundle', async () => {
     plugins: [
       ignoreImportPlugin,
       ...preBundlePlugins(),
-      tsBuildPlugin('es5', false),
       ...resolvePlugins,
+      tsBuildPlugin('es5', false),
       uglify(),
-      rollupFilesize(),
+      ...postBundlePlugins()
     ]
   });
+
+  await bundleBuild(minifiedUmdConfig, 'UMD MIN');
 
   // FESM+ES5 flat module bundle.
   const fesm5config = merge({}, baseConfig, {
@@ -272,9 +300,12 @@ gulp.task('build:bundle', async () => {
       ignoreImportPlugin,
       ...preBundlePlugins(),
       tsBuildPlugin('es5', false),
+      ...postBundlePlugins()
     ],
     external: config.esmExternals
   });
+
+  await bundleBuild(fesm5config, 'FESM5');
 
   // FESM+ES2015 flat module bundle.
   const fesm2015config = merge({}, baseConfig, {
@@ -287,26 +318,12 @@ gulp.task('build:bundle', async () => {
       ignoreImportPlugin,
       ...preBundlePlugins(),
       tsBuildPlugin('es2015', false),
+      ...postBundlePlugins()
     ],
     external: config.esmExternals
   });
 
-  const allBundles = [
-    umdConfig,
-    minifiedUmdConfig,
-    fesm5config,
-    fesm2015config
-  ].map(async (rollupConf) => {
-    try {
-      const bundleResult = await rollup(rollupConf);
-      await bundleResult.write(rollupConf.output);
-    } catch (error) {
-      console.log(chalk.red('Bundle build Failure'));
-      console.log(error);
-    }
-  });
-
-  await Promise.all(allBundles);
+  await bundleBuild(fesm2015config, 'FESM2015');
 });
 
 gulp.task('build', gulp.series('build:clean', 'build:copy:essentials', 'build:bundle'));
@@ -326,9 +343,10 @@ gulp.task('build:watch', async () => {
     external: Object.keys(config.umdGlobals),
     plugins: [
       ...lintPlugins,
-      ...preBundlePlugins(),
-      tsBuildPlugin('es5', false),
       ...resolvePlugins,
+      ...preBundlePlugins(),
+      rollupStyleBuildPlugin(true),
+      tsBuildPlugin('es5', false),
       rollupServe({
         contentBase: [config.watch.script, config.watch.demo],
         port: config.watch.port,
