@@ -197,6 +197,7 @@ const bundleBuild = async (config, type) => {
   } catch (error) {
     console.log(chalk.red(`${type} bundle build Failure`));
     console.log(error);
+    throw error;
   }
 };
 
@@ -267,8 +268,6 @@ gulp.task('build:bundle', async () => {
     ]
   });
 
-  await bundleBuild(umdConfig, 'UMD');
-
   // MIN UMD bundle.
   const minifiedUmdConfig = merge({}, baseConfig, {
     output: {
@@ -288,8 +287,6 @@ gulp.task('build:bundle', async () => {
     ]
   });
 
-  await bundleBuild(minifiedUmdConfig, 'UMD MIN');
-
   // FESM+ES5 flat module bundle.
   const fesm5config = merge({}, baseConfig, {
     output: {
@@ -304,8 +301,6 @@ gulp.task('build:bundle', async () => {
     ],
     external: config.esmExternals
   });
-
-  await bundleBuild(fesm5config, 'FESM5');
 
   // FESM+ES2015 flat module bundle.
   const fesm2015config = merge({}, baseConfig, {
@@ -323,7 +318,14 @@ gulp.task('build:bundle', async () => {
     external: config.esmExternals
   });
 
-  await bundleBuild(fesm2015config, 'FESM2015');
+  try {
+    await bundleBuild(umdConfig, 'UMD');
+    await bundleBuild(minifiedUmdConfig, 'UMD MIN');
+    await bundleBuild(fesm5config, 'FESM5');
+    await bundleBuild(fesm2015config, 'FESM2015');
+  } catch(error) {
+    return null;
+  }
 });
 
 gulp.task('build', gulp.series('build:clean', 'build:copy:essentials', 'build:bundle'));
