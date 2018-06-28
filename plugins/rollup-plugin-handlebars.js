@@ -73,7 +73,7 @@ export default (options) => {
 
       return {
         code: body,
-        map: map || {mappings: ''}
+        map: map || { mappings: '' }
       };
     }
   };

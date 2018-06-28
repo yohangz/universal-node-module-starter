@@ -18,9 +18,10 @@ import rollupImage from 'rollup-plugin-img';
 import rollupHandlebars from './plugins/rollup-plugin-handlebars';
 import rollupFilesize from 'rollup-plugin-filesize';
 import rollupProgress from 'rollup-plugin-progress';
+import rollupIgnoreImport from './plugins/rollup-plugin-ignore-import';
 
-import autoPrefixer from 'autoprefixer';
 import postCss from 'postcss';
+import postCssAutoPrefix from 'autoprefixer';
 import postCssImageInline from 'postcss-image-inliner';
 
 import typescript from 'typescript';
@@ -103,10 +104,10 @@ const rollupStyleBuildPlugin = (watch) => {
     processor: (css) => {
       return postCss([
         postCssImageInline({
-          maxFileSize: 1000,
+          maxFileSize: config.imageInlineLimit,
           assetPaths: config.assetPaths
         }),
-        autoPrefixer
+        postCssAutoPrefix,
       ])
         .process(css, { from: undefined })
         .then(result => result.css)
@@ -160,10 +161,9 @@ const lintPlugins = [
   })
 ];
 
-const preBundlePlugins = (watchMode) => {
+const preBundlePlugins = () => {
   return [
     rollupReplacePlugin,
-    rollupStyleBuildPlugin(watchMode),
     rollupHandlebars(),
     rollupImage({
       extensions: /\.(png|jpg|jpeg|gif|svg)$/,
@@ -172,6 +172,10 @@ const preBundlePlugins = (watchMode) => {
     })
   ];
 };
+
+const ignoreImportPlugin = rollupIgnoreImport({
+  extensions: ['.scss']
+});
 
 // Clean tasks
 
@@ -232,7 +236,8 @@ gulp.task('build:bundle', async () => {
     external: Object.keys(config.umdGlobals),
     plugins: [
       ...lintPlugins,
-      ...preBundlePlugins(false),
+      rollupStyleBuildPlugin(false),
+      ...preBundlePlugins(),
       tsBuildPlugin('es5', true),
       ...resolvePlugins,
     ]
@@ -248,7 +253,8 @@ gulp.task('build:bundle', async () => {
     },
     external: Object.keys(config.umdGlobals),
     plugins: [
-      ...preBundlePlugins(false),
+      ignoreImportPlugin,
+      ...preBundlePlugins(),
       tsBuildPlugin('es5', false),
       ...resolvePlugins,
       uglify(),
@@ -263,7 +269,8 @@ gulp.task('build:bundle', async () => {
       file: path.join(config.out, 'fesm5', `${packageJson.name}.es5.js`),
     },
     plugins: [
-      ...preBundlePlugins(false),
+      ignoreImportPlugin,
+      ...preBundlePlugins(),
       tsBuildPlugin('es5', false),
     ],
     external: config.esmExternals
@@ -277,7 +284,8 @@ gulp.task('build:bundle', async () => {
     },
 
     plugins: [
-      ...preBundlePlugins(false),
+      ignoreImportPlugin,
+      ...preBundlePlugins(),
       tsBuildPlugin('es2015', false),
     ],
     external: config.esmExternals
@@ -289,8 +297,13 @@ gulp.task('build:bundle', async () => {
     fesm5config,
     fesm2015config
   ].map(async (rollupConf) => {
-    const bundleResult = await rollup(rollupConf);
-    await bundleResult.write(rollupConf.output);
+    try {
+      const bundleResult = await rollup(rollupConf);
+      await bundleResult.write(rollupConf.output);
+    } catch (error) {
+      console.log(chalk.red('Bundle build Failure'));
+      console.log(error);
+    }
   });
 
   await Promise.all(allBundles);
@@ -313,7 +326,7 @@ gulp.task('build:watch', async () => {
     external: Object.keys(config.umdGlobals),
     plugins: [
       ...lintPlugins,
-      ...preBundlePlugins(true),
+      ...preBundlePlugins(),
       tsBuildPlugin('es5', false),
       ...resolvePlugins,
       rollupServe({
