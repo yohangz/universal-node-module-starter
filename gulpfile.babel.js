@@ -17,10 +17,11 @@ import rollupServe from 'rollup-plugin-serve';
 import rollupImage from 'rollup-plugin-img';
 import rollupHandlebars from './plugins/rollup-plugin-handlebars';
 import rollupFilesize from 'rollup-plugin-filesize';
+import rollupProgress from 'rollup-plugin-progress';
 
-import autoprefixer from 'autoprefixer';
-import postcss from 'postcss';
-import postBase64 from 'postcss-base64'
+import autoPrefixer from 'autoprefixer';
+import postCss from 'postcss';
+import postCssImageInline from 'postcss-image-inliner';
 
 import typescript from 'typescript';
 import merge from 'lodash/merge';
@@ -55,6 +56,8 @@ const config = {
     }
   ],
   ignore: [],
+  imageInlineLimit: 1000000,
+  assetPaths: [`${__dirname}/src/assets`],
   partialRoots: [`${__dirname}/src/templates`]
 };
 
@@ -98,11 +101,12 @@ const rollupStyleBuildPlugin = (watch) => {
       });
     },
     processor: (css) => {
-      return postcss([
-        postBase64({
-          extensions: ['.png', '.svg', '.jpg', '.jpeg']
+      return postCss([
+        postCssImageInline({
+          maxFileSize: 1000,
+          assetPaths: config.assetPaths
         }),
-        autoprefixer
+        autoPrefixer
       ])
         .process(css, { from: undefined })
         .then(result => result.css)
@@ -156,16 +160,18 @@ const lintPlugins = [
   })
 ];
 
-const bundleTemplatePlugins = (watchMode) => [
-  rollupReplacePlugin,
-  rollupStyleBuildPlugin(watchMode),
-  rollupHandlebars(),
-  rollupImage({
-    extensions: /\.(png|jpg|jpeg|gif|svg)$/,
-    limit: 10000000,
-    exclude: 'node_modules/**'
-  })
-];
+const preBundlePlugins = (watchMode) => {
+  return [
+    rollupReplacePlugin,
+    rollupStyleBuildPlugin(watchMode),
+    rollupHandlebars(),
+    rollupImage({
+      extensions: /\.(png|jpg|jpeg|gif|svg)$/,
+      limit: config.imageInlineLimit,
+      exclude: 'node_modules/**'
+    })
+  ];
+};
 
 // Clean tasks
 
@@ -226,9 +232,9 @@ gulp.task('build:bundle', async () => {
     external: Object.keys(config.umdGlobals),
     plugins: [
       ...lintPlugins,
-      ...bundleTemplatePlugins(false),
+      ...preBundlePlugins(false),
       tsBuildPlugin('es5', true),
-      ...resolvePlugins
+      ...resolvePlugins,
     ]
   });
 
@@ -242,11 +248,11 @@ gulp.task('build:bundle', async () => {
     },
     external: Object.keys(config.umdGlobals),
     plugins: [
-      ...bundleTemplatePlugins(false),
+      ...preBundlePlugins(false),
       tsBuildPlugin('es5', false),
       ...resolvePlugins,
       uglify(),
-      rollupFilesize()
+      rollupFilesize(),
     ]
   });
 
@@ -257,8 +263,8 @@ gulp.task('build:bundle', async () => {
       file: path.join(config.out, 'fesm5', `${packageJson.name}.es5.js`),
     },
     plugins: [
-      ...bundleTemplatePlugins(false),
-      tsBuildPlugin('es5', false)
+      ...preBundlePlugins(false),
+      tsBuildPlugin('es5', false),
     ],
     external: config.esmExternals
   });
@@ -271,8 +277,8 @@ gulp.task('build:bundle', async () => {
     },
 
     plugins: [
-      ...bundleTemplatePlugins(false),
-      tsBuildPlugin('es2015', false)
+      ...preBundlePlugins(false),
+      tsBuildPlugin('es2015', false),
     ],
     external: config.esmExternals
   });
@@ -307,7 +313,7 @@ gulp.task('build:watch', async () => {
     external: Object.keys(config.umdGlobals),
     plugins: [
       ...lintPlugins,
-      ...bundleTemplatePlugins(true),
+      ...preBundlePlugins(true),
       tsBuildPlugin('es5', false),
       ...resolvePlugins,
       rollupServe({
@@ -317,7 +323,8 @@ gulp.task('build:watch', async () => {
       }),
       rollupLivereload({
         watch: [config.watch.script, config.watch.demo]
-      })
+      }),
+      rollupProgress()
     ],
     watch: {
       exclude: ['node_modules/**']
