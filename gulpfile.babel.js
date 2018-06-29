@@ -18,7 +18,7 @@ import rollupImage from 'rollup-plugin-img';
 import rollupHandlebars from 'rollup-plugin-hbs';
 import rollupFilesize from 'rollup-plugin-filesize';
 import rollupProgress from 'rollup-plugin-progress';
-import rollupIgnoreImport from './plugins/rollup-plugin-ignore-import';
+import rollupIgnoreImport from 'rollup-plugin-ignore-import';
 
 import postCss from 'postcss';
 import postCssAutoPrefix from 'autoprefixer';
