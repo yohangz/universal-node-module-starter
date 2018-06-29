@@ -15,7 +15,7 @@ import rollupSassLint from 'rollup-plugin-sass-lint';
 import rollupLivereload from 'rollup-plugin-livereload';
 import rollupServe from 'rollup-plugin-serve';
 import rollupImage from 'rollup-plugin-img';
-import rollupHandlebars from './plugins/rollup-plugin-handlebars';
+import rollupHandlebars from 'rollup-plugin-hbs';
 import rollupFilesize from 'rollup-plugin-filesize';
 import rollupProgress from 'rollup-plugin-progress';
 import rollupIgnoreImport from './plugins/rollup-plugin-ignore-import';
