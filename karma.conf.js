@@ -3,6 +3,8 @@ var rollupCommonjs = require('rollup-plugin-commonjs');
 var rollupImage = require('rollup-plugin-img');
 var rollupHandlebars = require('rollup-plugin-hbs');
 var rollupTypescript = require('rollup-plugin-typescript2');
+var rollupIstanbul = require('rollup-plugin-istanbul');
+
 var typescript = require('typescript');
 
 module.exports = function(config) {
@@ -21,7 +23,7 @@ module.exports = function(config) {
 
     logLevel: config.LOG_INFO,
 
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['progress', 'kjhtml', 'coverage'],
 
     files: [
       /**
@@ -40,7 +42,7 @@ module.exports = function(config) {
       require('karma-chrome-launcher'),
       require('karma-rollup-preprocessor'),
       require('karma-jasmine-html-reporter'),
-      require('karma-coverage-istanbul-reporter')
+      require('karma-coverage')
     ],
 
     mime: {
@@ -49,10 +51,6 @@ module.exports = function(config) {
 
     client:{
       clearContext: false // leave Jasmine Spec Runner output visible in browser
-    },
-
-    coverageIstanbulReporter: {
-      reports: [ 'html', 'lcovonly' ],
     },
 
     rollupPreprocessor: {
@@ -79,6 +77,9 @@ module.exports = function(config) {
         rollupTypescript({
           tsconfig: `tsconfig.es5.json`,
           typescript: typescript
+        }),
+        rollupIstanbul({
+          exclude: ['src/**/*.spec.ts']
         })
       ],
       output: {
