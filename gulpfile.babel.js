@@ -58,8 +58,7 @@ const config = {
   ],
   ignore: [],
   imageInlineLimit: 1000000,
-  assetPaths: [`${__dirname}/src/assets`],
-  partialRoots: [`${__dirname}/src/templates`]
+  assetPaths: [`${__dirname}/src/assets`]
 };
 
 // Build utils
