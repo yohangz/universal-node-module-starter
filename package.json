@@ -5,7 +5,8 @@
   "scripts": {
     "build": "gulp build",
     "watch": "gulp watch",
-    "test": "karma start karma.conf.js"
+    "test": "karma start karma.conf.js",
+    "test:ci": "CI=true karma start karma.conf.js"
   },
   "author": "Yohan Gomez <yohan.gz@gmail.com>",
   "repository": "https://github.com/yohangz/typescript-library-starter.git",

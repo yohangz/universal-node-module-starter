@@ -6,6 +6,7 @@ var rollupTypescript = require('rollup-plugin-typescript2');
 var rollupIstanbul = require('rollup-plugin-istanbul');
 
 var typescript = require('typescript');
+process.env.CHROME_BIN = require('puppeteer').executablePath();
 
 module.exports = function(config) {
   config.set({
@@ -13,11 +14,11 @@ module.exports = function(config) {
 
     frameworks: ['jasmine'],
 
-    browsers: ['Chrome'],
+    browsers: [ process.env.CI? 'ChromeHeadless': 'Chrome' ],
 
     port: 9876,
 
-    singleRun: false,
+    singleRun: !!process.env.CI,
 
     colors: true,
 
