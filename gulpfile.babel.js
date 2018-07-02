@@ -31,35 +31,7 @@ import fs from 'fs';
 import chalk from 'chalk';
 
 import packageJson from './package.json';
-
-// Configuration
-
-const config = {
-  namespace: 'ts.lib',
-  entry: 'index.ts',
-  source: `${__dirname}/src`,
-  out: `${__dirname}/dist`,
-  watch: {
-    script: `${__dirname}/.tmp`,
-    demo: `${__dirname}/demo/watch`,
-    port: 4000,
-    open: true
-  },
-  copy: ['README.md', 'LICENSE'],
-  umdGlobals: {},
-  esmExternals: [
-    'handlebars/runtime'
-  ],
-  pathReplacePatterns: [
-    {
-      test: /\.\/conf\/conf1/g,
-      replace: './conf/conf2',
-    }
-  ],
-  ignore: [],
-  imageInlineLimit: 1000000,
-  assetPaths: [`${__dirname}/src/assets`]
-};
+import config from './config.json';
 
 // Build utils
 
