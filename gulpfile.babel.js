@@ -103,10 +103,11 @@ const resolvePlugins = [
   })
 ];
 
-const tsBuildPlugin = (esVersion, generateDefinition) => {
+const tsBuildPlugin = (esVersion, generateDefinition, watch) => {
   let buildConf = {
     tsconfig: `tsconfig.${esVersion}.json`,
-    typescript: typescript
+    typescript: typescript,
+    check: !watch
   };
 
   if (generateDefinition) {
@@ -234,7 +235,7 @@ gulp.task('build:bundle', async () => {
       rollupStyleBuildPlugin(false),
       ...preBundlePlugins(),
       ...resolvePlugins,
-      tsBuildPlugin('es5', true),
+      tsBuildPlugin('es5', true, false),
       ...postBundlePlugins()
     ]
   });
@@ -252,7 +253,7 @@ gulp.task('build:bundle', async () => {
       ignoreImportPlugin,
       ...preBundlePlugins(),
       ...resolvePlugins,
-      tsBuildPlugin('es5', false),
+      tsBuildPlugin('es5', false, false),
       uglify(),
       ...postBundlePlugins()
     ]
@@ -267,7 +268,7 @@ gulp.task('build:bundle', async () => {
     plugins: [
       ignoreImportPlugin,
       ...preBundlePlugins(),
-      tsBuildPlugin('es5', false),
+      tsBuildPlugin('es5', false, false),
       ...postBundlePlugins()
     ],
     external: config.esmExternals
@@ -283,7 +284,7 @@ gulp.task('build:bundle', async () => {
     plugins: [
       ignoreImportPlugin,
       ...preBundlePlugins(),
-      tsBuildPlugin('es2015', false),
+      tsBuildPlugin('es2015', false, false),
       ...postBundlePlugins()
     ],
     external: config.esmExternals
@@ -316,10 +317,10 @@ gulp.task('build:watch', async () => {
     external: Object.keys(config.umdGlobals),
     plugins: [
       ...lintPlugins,
-      ...resolvePlugins,
-      ...preBundlePlugins(),
       rollupStyleBuildPlugin(true),
-      tsBuildPlugin('es5', false),
+      ...preBundlePlugins(),
+      ...resolvePlugins,
+      tsBuildPlugin('es5', false, true),
       rollupServe({
         contentBase: [config.watch.script, config.watch.demo],
         port: config.watch.port,
