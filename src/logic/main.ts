@@ -1,13 +1,13 @@
-import { Greeter } from "./greet";
+import { Greeter } from './greet';
 
 export class Main {
-    private greeter: Greeter;
+  private greeter: Greeter;
 
-    constructor(name: string) {
-        this.greeter = new Greeter(name);
-    }
+  constructor(name: string) {
+    this.greeter = new Greeter(name);
+  }
 
-    public greet(): void {
-        this.greeter.greet();
-    }
+  public greet(): void {
+    this.greeter.greet();
+  }
 }

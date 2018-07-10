@@ -1,8 +1,8 @@
-import logo from "../assets/logo.png";
+import logo from '../assets/logo.png';
 
-import { Configuration } from "./configuration";
+import { Configuration } from './configuration';
 
 export let conf: Configuration = {
-    lang: "Typescript 2",
-    logo,
+  lang: 'Typescript 2',
+  logo,
 };

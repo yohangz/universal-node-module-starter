@@ -1,4 +1,4 @@
 export interface Configuration {
-    lang: string;
-    logo: string;
+  lang: string;
+  logo: string;
 }
