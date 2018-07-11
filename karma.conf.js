@@ -77,7 +77,8 @@ module.exports = function(config) {
         }),
         rollupTypescript({
           tsconfig: `tsconfig.es5.json`,
-          typescript: typescript
+          typescript: typescript,
+          check: !!process.env.CI
         }),
         rollupIstanbul({
           exclude: ['src/**/*.spec.ts']
