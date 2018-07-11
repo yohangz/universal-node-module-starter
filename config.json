@@ -27,5 +27,6 @@
   "imageInlineLimit": 1000000,
   "assetPaths": [
     "src/assets"
-  ]
+  ],
+  "bundleStyle": false
 }

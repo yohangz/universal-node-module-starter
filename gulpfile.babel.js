@@ -51,7 +51,7 @@ const makeDir = (name) => {
 
 const rollupStyleBuildPlugin = (watch) => {
   return rollupSass({
-    output: (styles, styleNodes) => {
+    output: config.bundleStyle || function (styles, styleNodes) {
       const styleDist = `${watch? config.watch.script: config.out}/style`;
       makeDir(styleDist);
 
@@ -72,6 +72,7 @@ const rollupStyleBuildPlugin = (watch) => {
         fs.writeFileSync(`${styleDist}/${node.name.slice(0, -4)}css`, node.styles);
       });
     },
+    insert: config.bundleStyle,
     processor: (css) => {
       return postCss([
         postCssImageInline({
