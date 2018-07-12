@@ -198,7 +198,7 @@ gulp.task('build:copy:essentials', () => {
   let fieldsToCopy = ['name', 'version', 'description', 'keywords', 'author', 'repository', 'license', 'bugs', 'homepage'];
 
   let targetPackage = {
-    main: `bundles/${packageJson.name}.umd.js`,
+    main: `bundles/${packageJson.name}.${config.bundleFormat}.js`,
     module: `fesm5/${packageJson.name}.js`,
     es2015: `fesm2015/${packageJson.name}.js`,
     fesm5: `fesm5/${packageJson.name}.js`,
@@ -222,15 +222,15 @@ gulp.task('build:copy:essentials', () => {
 });
 
 gulp.task('build:bundle', async () => {
-  // UMD bundle.
-  const umdConfig = merge({}, baseConfig, {
+  // flat bundle.
+  const flatConfig = merge({}, baseConfig, {
     output: {
       name: config.namespace,
-      format: 'umd',
-      file: path.join(config.out, 'bundles', `${packageJson.name}.umd.js`),
-      globals: config.umdGlobals
+      format: config.bundleFormat,
+      file: path.join(config.out, 'bundles', `${packageJson.name}.${config.bundleFormat}.js`),
+      globals: config.flatGlobals
     },
-    external: Object.keys(config.umdGlobals),
+    external: Object.keys(config.flatGlobals),
     plugins: [
       ...lintPlugins,
       rollupStyleBuildPlugin(false),
@@ -241,15 +241,15 @@ gulp.task('build:bundle', async () => {
     ]
   });
 
-  // MIN UMD bundle.
-  const minifiedUmdConfig = merge({}, baseConfig, {
+  // minified flat bundle.
+  const minifiedFlatConfig = merge({}, baseConfig, {
     output: {
       name: config.namespace,
-      format: 'umd',
-      file: path.join(config.out, 'bundles', `${packageJson.name}.umd.min.js`),
-      globals: config.umdGlobals
+      format: config.bundleFormat,
+      file: path.join(config.out, 'bundles', `${packageJson.name}.${config.bundleFormat}.min.js`),
+      globals: config.flatGlobals
     },
-    external: Object.keys(config.umdGlobals),
+    external: Object.keys(config.flatGlobals),
     plugins: [
       ignoreImportPlugin,
       ...preBundlePlugins(),
@@ -292,8 +292,8 @@ gulp.task('build:bundle', async () => {
   });
 
   try {
-    await bundleBuild(umdConfig, 'UMD');
-    await bundleBuild(minifiedUmdConfig, 'UMD MIN');
+    await bundleBuild(flatConfig, 'FLAT');
+    await bundleBuild(minifiedFlatConfig, 'FLAT MIN');
     await bundleBuild(fesm5config, 'FESM5');
     await bundleBuild(fesm2015config, 'FESM2015');
   } catch(error) {
@@ -311,11 +311,11 @@ gulp.task('build:watch', async () => {
   const watchConfig = merge({}, baseConfig, {
     output: {
       name: config.namespace,
-      format: 'umd',
-      file: path.join(config.watch.script, `${packageJson.name}.umd.js`),
-      globals: config.umdGlobals
+      format: config.bundleFormat,
+      file: path.join(config.watch.script, `${packageJson.name}.${config.bundleFormat}.js`),
+      globals: config.flatGlobals
     },
-    external: Object.keys(config.umdGlobals),
+    external: Object.keys(config.flatGlobals),
     plugins: [
       ...lintPlugins,
       rollupStyleBuildPlugin(true),

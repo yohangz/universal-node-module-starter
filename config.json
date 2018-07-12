@@ -13,7 +13,7 @@
     "README.md",
     "LICENSE"
   ],
-  "umdGlobals": {},
+  "flatGlobals": {},
   "esmExternals": [
     "handlebars/runtime"
   ],
@@ -28,5 +28,6 @@
   "assetPaths": [
     "src/assets"
   ],
-  "bundleStyle": false
+  "bundleStyle": false,
+  "bundleFormat": "umd"
 }
