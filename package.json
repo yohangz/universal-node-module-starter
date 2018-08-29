@@ -24,7 +24,6 @@
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.0.0",
     "@types/jasmine": "^2.8.8",
-    "@types/jquery": "^3.3.6",
     "autoprefixer": "^8.6.3",
     "chalk": "^2.4.1",
     "gulp": "^4.0.0",
