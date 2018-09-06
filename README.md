@@ -56,6 +56,67 @@ npm run test
 npm run test:ci
 ```
 
+# Build Configuration
+
+```json
+{
+  "namespace": "ts.lib",
+  "entry": "index.ts",
+  "source": "src",
+  "out": "dist",
+  "watch": {
+    "script": ".tmp",
+    "demo": "demo/watch",
+    "port": 4000,
+    "open": true
+  },
+  "copy": [
+    "README.md",
+    "LICENSE"
+  ],
+  "flatGlobals": {},
+  "esmExternals": [
+    "handlebars/runtime"
+  ],
+  "pathReplacePatterns": [
+    {
+      "test": "./conf/conf1",
+      "replace": "./conf/conf2"
+    }
+  ],
+  "ignore": [],
+  "imageInlineLimit": 1000000,
+  "assetPaths": [
+    "src/assets"
+  ],
+  "bundleStyle": false,
+  "bundleFormat": "umd"
+}
+```
+
+| Config                      	| Type             	| Definition                                                                       	|
+|-----------------------------	|------------------	|----------------------------------------------------------------------------------	|
+| namespace                   	| string           	| application namespace to be used                                                 	|
+| entry                       	| string           	| entry typescript file                                                            	|
+| source                      	| string           	| source directory                                                                 	|
+| out                         	| string           	| build output directory                                                           	|
+| watch                       	| object           	| watch mode configuration object                                                  	|
+| watch.script                	| string           	| watch build temp directory                                                       	|
+| watch.demo                  	| string           	| watch demo page dir                                                              	|
+| watch.port                  	| number           	| watch server port                                                                	|
+| watch.open                  	| boolean          	| open browser automatically                                                       	|
+| copy                        	| array of strings 	| List of files paths to copy on build.                                            	|
+| flatGlobals                 	| object           	| flat bundle build global dependencies.  Listed will not be treated as externals. 	|
+| esmExternals                	|                  	| ESM build external dependencies                                                  	|
+| pathReplacePatterns         	| array of objects 	| Import path replace pattern collection                                           	|
+| pathReplacePatterns.test    	| string           	| Path to find                                                                     	|
+| pathReplacePatterns.replace 	| string           	| Path to replace                                                                  	|
+| ignore                      	| array of strings 	| Import paths to ignore with noop implementation                                  	|
+| imageInlineLimit            	| number           	| Inline image if image size is less than specified limit                          	|
+| assetPaths                  	| array of strings 	| List of paths which contains static assets referenced in style sheets            	|
+| bundleStyle                 	| boolean          	| Inline bundle styles to build                                                    	|
+| bundleFormat                	| string           	| umd, amd, iife, system, es, cjs                                             	|
+
 # Contributions
 
 Feel free to open an issue or create a PR
