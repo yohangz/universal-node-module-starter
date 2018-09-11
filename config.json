@@ -1,8 +1,9 @@
 {
   "namespace": "ts.lib",
   "entry": "index.ts",
-  "source": "src",
+  "source": "src/ts",
   "out": "dist",
+  "tsProject": true,
   "watch": {
     "script": ".tmp",
     "demo": "demo/watch",

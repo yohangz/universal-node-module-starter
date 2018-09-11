@@ -19,6 +19,7 @@ import rollupHandlebars from 'rollup-plugin-hbs';
 import rollupFilesize from 'rollup-plugin-filesize';
 import rollupProgress from 'rollup-plugin-progress';
 import rollupIgnoreImport from 'rollup-plugin-ignore-import';
+import rollupBabel from 'rollup-plugin-babel';
 
 import postCss from 'postcss';
 import postCssAutoPrefix from 'autoprefixer';
@@ -104,25 +105,42 @@ const resolvePlugins = [
   })
 ];
 
-const tsBuildPlugin = (esVersion, generateDefinition, watch) => {
-  let buildConf = {
-    tsconfig: `tsconfig.${esVersion}.json`,
-    typescript: typescript,
-    check: !watch
-  };
-
-  if (generateDefinition) {
-    buildConf.tsconfigOverride  = {
-      compilerOptions: {
-        declaration: true,
-        declarationDir: config.out
-      }
+const buildPlugin = (esVersion, generateDefinition, watch) => {
+  if (config.tsProject) {
+    let buildConf = {
+      tsconfig: `tsconfig.${esVersion}.json`,
+      typescript: typescript,
+      check: !watch
     };
 
-    buildConf.useTsconfigDeclarationDir = true;
+    if (generateDefinition) {
+      buildConf.tsconfigOverride  = {
+        compilerOptions: {
+          declaration: true,
+          declarationDir: config.out
+        }
+      };
+
+      buildConf.useTsconfigDeclarationDir = true;
+    }
+
+    return rollupTypescript(buildConf);
   }
 
-  return rollupTypescript(buildConf);
+  return rollupBabel({
+    babelrc: false,
+    exclude: 'node_modules/**',
+    presets: [
+      [
+        '@babel/preset-env',
+        {
+          'targets': {
+            'esmodules': esVersion === 'es2015'
+          }
+        }
+      ]
+    ]
+  });
 };
 
 const lintPlugins = [
@@ -236,7 +254,7 @@ gulp.task('build:bundle', async () => {
       rollupStyleBuildPlugin(false),
       ...preBundlePlugins(),
       ...resolvePlugins,
-      tsBuildPlugin('es5', true, false),
+      buildPlugin('es5', true, false),
       ...postBundlePlugins()
     ]
   });
@@ -254,7 +272,7 @@ gulp.task('build:bundle', async () => {
       ignoreImportPlugin,
       ...preBundlePlugins(),
       ...resolvePlugins,
-      tsBuildPlugin('es5', false, false),
+      buildPlugin('es5', false, false),
       uglify(),
       ...postBundlePlugins()
     ]
@@ -269,7 +287,7 @@ gulp.task('build:bundle', async () => {
     plugins: [
       ignoreImportPlugin,
       ...preBundlePlugins(),
-      tsBuildPlugin('es5', false, false),
+      buildPlugin('es5', false, false),
       ...postBundlePlugins()
     ],
     external: config.esmExternals
@@ -285,7 +303,7 @@ gulp.task('build:bundle', async () => {
     plugins: [
       ignoreImportPlugin,
       ...preBundlePlugins(),
-      tsBuildPlugin('es2015', false, false),
+      buildPlugin('es2015', false, false),
       ...postBundlePlugins()
     ],
     external: config.esmExternals
@@ -321,7 +339,7 @@ gulp.task('build:watch', async () => {
       rollupStyleBuildPlugin(true),
       ...preBundlePlugins(),
       ...resolvePlugins,
-      tsBuildPlugin('es5', false, true),
+      buildPlugin('es5', false, true),
       rollupServe({
         contentBase: [config.watch.script, config.watch.demo],
         port: config.watch.port,
