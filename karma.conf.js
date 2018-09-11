@@ -4,9 +4,31 @@ var rollupImage = require('rollup-plugin-img');
 var rollupHandlebars = require('rollup-plugin-hbs');
 var rollupTypescript = require('rollup-plugin-typescript2');
 var rollupIstanbul = require('rollup-plugin-istanbul');
+var rollupBabel = require('rollup-plugin-babel');
+
+var config = require('./config.json');
 
 var typescript = require('typescript');
 process.env.CHROME_BIN = require('puppeteer').executablePath();
+
+var testGlob =   config.source + '/**/*.spec' + (config.tsProject? '.ts': '.js');
+console.log(testGlob);
+
+var preprocess = {};
+preprocess[testGlob] = ['rollup'];
+
+var buildPlugin = config.tsProject?
+  rollupTypescript({
+    tsconfig: 'tsconfig.es5.json',
+    typescript: typescript,
+    check: !!process.env.CI
+  }):
+  rollupBabel({
+    babelrc: false,
+    exclude: 'node_modules/**',
+    presets: [ '@babel/preset-env' ],
+  });
+
 
 module.exports = function(config) {
   config.set({
@@ -31,12 +53,10 @@ module.exports = function(config) {
        * Make sure to disable Karma’s file watcher
        * because the preprocessor will use its own.
        */
-      { pattern: 'src/**/*.spec.ts', watched: false }
+      { pattern: testGlob, watched: false }
     ],
 
-    preprocessors: {
-      'src/**/*.spec.ts': ['rollup']
-    },
+    preprocessors: preprocess,
 
     plugins: [
       require('karma-jasmine'),
@@ -75,13 +95,9 @@ module.exports = function(config) {
           limit: 1000000,
           exclude: 'node_modules/**'
         }),
-        rollupTypescript({
-          tsconfig: `tsconfig.es5.json`,
-          typescript: typescript,
-          check: !!process.env.CI
-        }),
+        buildPlugin,
         rollupIstanbul({
-          exclude: ['src/**/*.spec.ts']
+          exclude: [testGlob]
         })
       ],
       output: {
