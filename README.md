@@ -62,8 +62,9 @@ npm run test:ci
 {
   "namespace": "ts.lib",
   "entry": "index.ts",
-  "source": "src",
+  "source": "src/ts",
   "out": "dist",
+  "tsProject": true,
   "watch": {
     "script": ".tmp",
     "demo": "demo/watch",
@@ -100,6 +101,7 @@ npm run test:ci
 | entry                       	| string           	| entry typescript file                                                            	|
 | source                      	| string           	| source directory                                                                 	|
 | out                         	| string           	| build output directory                                                           	|
+| tsProject                     | boolean           | Set true if library source is in Typescript                                       |
 | watch                       	| object           	| watch mode configuration object                                                  	|
 | watch.script                	| string           	| watch build temp directory                                                       	|
 | watch.demo                  	| string           	| watch demo page dir                                                              	|
