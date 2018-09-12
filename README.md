@@ -1,5 +1,5 @@
-# Typescript Library Starter
-> Typescript based starter kit to build library node modules compliant with Browser and NodeJS
+# Universal Node Module Starter
+> Universal node module starter kit to build library node modules compliant with Browser and NodeJS with vanilla JS and Typescript source support.
 
 [![Build Status](https://travis-ci.org/yohangz/typescript-library-starter.svg?branch=master)](https://travis-ci.org/yohangz/typescript-library-starter)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/yohangz/typescript-library-starter/blob/master/LICENSE)
@@ -11,6 +11,7 @@
 - [x] Yarn
 - [x] Travis
 - [x] Typescript 2.x
+- [x] Babel 7.x
 - [x] TS Lint code analysis
 - [x] Handlebars templating
 - [x] Post CSS based image inline and auto prefixing
